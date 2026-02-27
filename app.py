@@ -17,9 +17,20 @@ from pdf_generator import generate_pdf
 
 app = FastAPI(title="RemiDe PDF Generator")
 
+
+def _env_int(name: str, default: int) -> int:
+    """Безопасно читает int из env."""
+    raw = os.getenv(name, str(default))
+    try:
+        return int(raw)
+    except ValueError:
+        return default
+
+
 # Конфиг из переменных окружения
 FIGMA_TOKEN = os.getenv("FIGMA_TOKEN", "")
 FIGMA_FILE_KEY = os.getenv("FIGMA_FILE_KEY", "evlu7PLuBtbw5unD8NmU9d")
+FIGMA_CACHE_TTL = max(0, _env_int("FIGMA_CACHE_TTL", 0))
 
 # Статические файлы
 BASE_DIR = Path(__file__).resolve().parent
@@ -246,10 +257,14 @@ async def generate(markdown: str = Form(...)):
     if not markdown:
         return PlainTextResponse("Вставьте Markdown перед генерацией", status_code=400)
 
-    # 1. Читаем токены из Figma (с кешем)
+    # 1. Читаем токены из Figma
     try:
         if FIGMA_TOKEN:
-            tokens = fetch_design_tokens(FIGMA_FILE_KEY, FIGMA_TOKEN)
+            tokens = fetch_design_tokens(
+                FIGMA_FILE_KEY,
+                FIGMA_TOKEN,
+                cache_ttl_seconds=FIGMA_CACHE_TTL,
+            )
         else:
             # Фолбэк: дефолтные токены
             tokens = _default_tokens()

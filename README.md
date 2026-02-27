@@ -32,6 +32,7 @@
 |---|---|
 | `FIGMA_TOKEN` | Personal Access Token из Figma |
 | `FIGMA_FILE_KEY` | Ключ файла из URL Figma |
+| `FIGMA_CACHE_TTL` | TTL кеша токенов в секундах. `0` (по умолчанию) — без кеша, изменения из Figma применяются сразу |
 
 ## Локальный запуск
 

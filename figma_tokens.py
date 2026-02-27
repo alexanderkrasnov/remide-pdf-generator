@@ -1,6 +1,6 @@
 """
 Модуль для чтения дизайн-токенов из Figma REST API.
-Кеширует токены на 5 минут, чтобы не дёргать API каждый запрос.
+Опционально кеширует токены, чтобы не дёргать API каждый запрос.
 """
 
 import time
@@ -9,18 +9,23 @@ from typing import Optional
 
 # Кеш токенов: {file_key: {"tokens": {...}, "timestamp": float}}
 _cache: dict = {}
-CACHE_TTL = 300  # 5 минут
 
 
-def fetch_design_tokens(file_key: str, figma_token: str) -> dict:
+def fetch_design_tokens(file_key: str, figma_token: str, cache_ttl_seconds: int = 0) -> dict:
     """
     Получает дизайн-токены из Figma API.
     Возвращает словарь с цветами, типографикой и метаданными.
+
+    cache_ttl_seconds:
+    - 0 или меньше: без кеша (всегда свежие стили)
+    - >0: использовать кеш в секундах
     """
+    ttl = max(0, int(cache_ttl_seconds))
+
     # Проверяем кеш
-    if file_key in _cache:
+    if ttl > 0 and file_key in _cache:
         cached = _cache[file_key]
-        if time.time() - cached["timestamp"] < CACHE_TTL:
+        if time.time() - cached["timestamp"] < ttl:
             return cached["tokens"]
 
     headers = {"X-Figma-Token": figma_token}
@@ -39,8 +44,11 @@ def fetch_design_tokens(file_key: str, figma_token: str) -> dict:
 
     tokens = _parse_tokens(file_data, styles_data)
 
-    # Кешируем
-    _cache[file_key] = {"tokens": tokens, "timestamp": time.time()}
+    # Кешируем только при включенном TTL
+    if ttl > 0:
+        _cache[file_key] = {"tokens": tokens, "timestamp": time.time()}
+    else:
+        _cache.pop(file_key, None)
 
     return tokens
 
