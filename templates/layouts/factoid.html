@@ -1,0 +1,54 @@
+<div class="slide">
+  <!-- Заголовок + субтайтл -->
+  <div style="position:absolute; left:64px; top:64px; width:886px;">
+    <div class="title">
+      {% if slide.title_accent %}
+        {{ slide.title.split(slide.title_accent)[0] if slide.title_accent in slide.title else slide.title }}<br>
+        <span class="title-accent">{{ slide.title_accent }}</span><br>
+        {{ slide.title.split(slide.title_accent)[1] if slide.title_accent in slide.title else '' }}
+      {% else %}
+        {{ slide.title }}
+      {% endif %}
+    </div>
+
+    {% if slide.subtitle %}
+    <div class="subtitle" style="margin-top:36px; max-width:680px;">
+      {{ slide.subtitle }}
+    </div>
+    {% endif %}
+
+    {% if slide.body %}
+    <div class="body-text" style="margin-top:24px; max-width:680px;">
+      {% for line in slide.body %}
+      <p style="margin-bottom:10px;">{{ line }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Факт-карточки -->
+  <div class="factoids" style="position:absolute; bottom:100px; left:64px; right:64px;">
+    {% for factoid in slide.factoids %}
+    <div class="factoid {{ factoid.color }}">
+      <div class="factoid-number">{{ factoid.number }}</div>
+      <div class="factoid-label">{{ factoid.label }}</div>
+      {% if factoid.sublabel %}
+      <div class="factoid-sublabel">{{ factoid.sublabel }}</div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Футер -->
+  <div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-content">
+      {% if logo_path %}
+      <img class="footer-logo" src="{{ logo_path }}" alt="RemiDe" />
+      {% else %}
+      <span style="font-size:15px; font-weight:600; color:var(--text-muted);">RemiDe</span>
+      {% endif %}
+      <span class="footer-url">remide.xyz</span>
+    </div>
+  </div>
+</div>

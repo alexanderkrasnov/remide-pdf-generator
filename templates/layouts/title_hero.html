@@ -1,0 +1,31 @@
+<div class="slide">
+  <div style="position:absolute; left:64px; top:50%; transform:translateY(-50%); width:1400px;">
+    <div class="title" style="font-size:calc(var(--title-size) * 1.2);">
+      {% if slide.title_accent %}
+        {{ slide.title.split(slide.title_accent)[0] if slide.title_accent in slide.title else slide.title }}<br>
+        <span class="title-accent">{{ slide.title_accent }}</span><br>
+        {{ slide.title.split(slide.title_accent)[1] if slide.title_accent in slide.title else '' }}
+      {% else %}
+        {{ slide.title }}
+      {% endif %}
+    </div>
+
+    {% if slide.subtitle %}
+    <div class="subtitle" style="margin-top:40px; font-size:30px; max-width:900px;">
+      {{ slide.subtitle }}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="footer">
+    <div class="footer-line"></div>
+    <div class="footer-content">
+      {% if logo_path %}
+      <img class="footer-logo" src="{{ logo_path }}" alt="RemiDe" />
+      {% else %}
+      <span style="font-size:15px; font-weight:600; color:var(--text-muted);">RemiDe</span>
+      {% endif %}
+      <span class="footer-url">remide.xyz</span>
+    </div>
+  </div>
+</div>

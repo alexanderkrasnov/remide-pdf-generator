@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @page {
+    size: 1920px 1080px;
+    margin: 0;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+  }
+
+  :root {
+    --bg: {{ tokens.colors.get('background', '#2c2c2c') }};
+    --text-primary: {{ tokens.colors.get('text_primary', '#f5f5f5') }};
+    --text-muted: {{ tokens.colors.get('text_muted', 'rgba(255,255,255,0.6)') }};
+    --border: {{ tokens.colors.get('border', '#383838') }};
+    --accent: {{ tokens.colors.get('accent_primary', '#4F9EF8') }};
+    --factoid-red: {{ tokens.colors.get('factoid_red', '#E85D5D') }};
+    --factoid-yellow: {{ tokens.colors.get('factoid_yellow', '#F0A500') }};
+    --factoid-cyan: {{ tokens.colors.get('factoid_cyan', '#4DD0E1') }};
+    --factoid-green: {{ tokens.colors.get('factoid_green', '#14ae5c') }};
+    --factoid-purple: {{ tokens.colors.get('factoid_purple', '#A78BFA') }};
+
+    --title-size: {{ tokens.typography.get('title_hero', {}).get('size', 88) }}px;
+    --title-weight: {{ tokens.typography.get('title_hero', {}).get('weight', 800) }};
+    --title-lh: {{ tokens.typography.get('title_hero', {}).get('line_height', 1.1) }};
+    --title-ls: {{ tokens.typography.get('title_hero', {}).get('letter_spacing', -2.5) }}px;
+
+    --subtitle-size: {{ tokens.typography.get('subtitle', {}).get('size', 26) }}px;
+    --subtitle-weight: {{ tokens.typography.get('subtitle', {}).get('weight', 400) }};
+    --subtitle-lh: {{ tokens.typography.get('subtitle', {}).get('line_height', 1.55) }};
+
+    --body-size: {{ tokens.typography.get('body', {}).get('size', 16) }}px;
+    --body-weight: {{ tokens.typography.get('body', {}).get('weight', 400) }};
+    --body-lh: {{ tokens.typography.get('body', {}).get('line_height', 1.4) }};
+
+    --factoid-num-size: {{ tokens.typography.get('factoid_number', {}).get('size', 72) }}px;
+    --factoid-num-weight: {{ tokens.typography.get('factoid_number', {}).get('weight', 800) }};
+    --factoid-label-size: {{ tokens.typography.get('factoid_label', {}).get('size', 18) }}px;
+  }
+
+  .slide {
+    width: 1920px;
+    height: 1080px;
+    background: var(--bg);
+    position: relative;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  .slide:last-child {
+    page-break-after: avoid;
+  }
+
+  /* ── Заголовок ── */
+  .title {
+    font-size: var(--title-size);
+    font-weight: var(--title-weight);
+    line-height: var(--title-lh);
+    color: var(--text-primary);
+    letter-spacing: var(--title-ls);
+  }
+
+  .title-accent { color: var(--accent); }
+
+  /* ── Субтайтл ── */
+  .subtitle {
+    font-size: var(--subtitle-size);
+    font-weight: var(--subtitle-weight);
+    line-height: var(--subtitle-lh);
+    color: var(--text-muted);
+  }
+
+  /* ── Body ── */
+  .body-text {
+    font-size: var(--body-size);
+    font-weight: var(--body-weight);
+    line-height: var(--body-lh);
+    color: var(--text-muted);
+  }
+
+  /* ── Факт-карточки ── */
+  .factoids {
+    display: flex;
+    gap: 28px;
+  }
+
+  .factoid {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 28px 32px;
+    border-top: 3px solid;
+  }
+
+  .factoid.red    { border-top-color: var(--factoid-red); }
+  .factoid.yellow { border-top-color: var(--factoid-yellow); }
+  .factoid.cyan   { border-top-color: var(--factoid-cyan); }
+  .factoid.green  { border-top-color: var(--factoid-green); }
+  .factoid.purple { border-top-color: var(--factoid-purple); }
+
+  .factoid-number {
+    font-size: var(--factoid-num-size);
+    font-weight: var(--factoid-num-weight);
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+
+  .factoid.red    .factoid-number { color: var(--factoid-red); }
+  .factoid.yellow .factoid-number { color: var(--factoid-yellow); }
+  .factoid.cyan   .factoid-number { color: var(--factoid-cyan); }
+  .factoid.green  .factoid-number { color: var(--factoid-green); }
+  .factoid.purple .factoid-number { color: var(--factoid-purple); }
+
+  .factoid-label {
+    font-size: var(--factoid-label-size);
+    font-weight: 500;
+    margin-top: 14px;
+  }
+
+  .factoid.red    .factoid-label { color: var(--factoid-red); }
+  .factoid.yellow .factoid-label { color: var(--factoid-yellow); }
+  .factoid.cyan   .factoid-label { color: var(--factoid-cyan); }
+  .factoid.green  .factoid-label { color: var(--factoid-green); }
+  .factoid.purple .factoid-label { color: var(--factoid-purple); }
+
+  .factoid-sublabel {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  /* ── Футер ── */
+  .footer {
+    position: absolute;
+    bottom: 24px;
+    left: 64px;
+    right: 64px;
+  }
+
+  .footer-line {
+    height: 1px;
+    background: var(--border);
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 24px;
+  }
+
+  .footer-logo {
+    height: 18px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    opacity: 0.85;
+  }
+
+  .footer-url {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+{% for slide in slides %}
+{% include "layouts/" + slide.layout + ".html" %}
+{% endfor %}
+</body>
+</html>
