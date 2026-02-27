@@ -7,7 +7,7 @@ import os
 from io import BytesIO
 from pathlib import Path
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, StreamingResponse
+from fastapi.responses import HTMLResponse, PlainTextResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from figma_tokens import fetch_design_tokens
@@ -161,6 +161,7 @@ FRONTEND_HTML = """<!DOCTYPE html>
     <form id="form" action="/generate" method="post">
       <textarea
         name="markdown"
+        required
         placeholder="# Заголовок слайда&#10;## Подзаголовок&#10;&#10;Текст слайда...&#10;&#10;**$120B** — Trade finance — gap annually"
       ></textarea>
 
@@ -196,8 +197,23 @@ Sub-Saharan Africa's growth.
       spinner.style.display = 'inline-block';
 
       const formData = new FormData(this);
+      const markdown = (formData.get('markdown') || '').toString().trim();
+      if (!markdown) {
+        alert('Вставьте Markdown перед генерацией');
+        btn.disabled = false;
+        spinner.style.display = 'none';
+        return;
+      }
+
       fetch('/generate', { method: 'POST', body: formData })
-        .then(r => r.blob())
+        .then(async (r) => {
+          const contentType = r.headers.get('content-type') || '';
+          if (!r.ok || !contentType.includes('application/pdf')) {
+            const errorText = await r.text();
+            throw new Error(errorText || 'Не удалось сгенерировать PDF');
+          }
+          return r.blob();
+        })
         .then(blob => {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
@@ -225,22 +241,35 @@ async def index():
 @app.post("/generate")
 async def generate(markdown: str = Form(...)):
     """Генерирует PDF из Markdown."""
+    markdown = markdown.strip()
+    if not markdown:
+        return PlainTextResponse("Вставьте Markdown перед генерацией", status_code=400)
 
     # 1. Читаем токены из Figma (с кешем)
-    if FIGMA_TOKEN:
-        tokens = fetch_design_tokens(FIGMA_FILE_KEY, FIGMA_TOKEN)
-    else:
-        # Фолбэк: дефолтные токены
+    try:
+        if FIGMA_TOKEN:
+            tokens = fetch_design_tokens(FIGMA_FILE_KEY, FIGMA_TOKEN)
+        else:
+            # Фолбэк: дефолтные токены
+            tokens = _default_tokens()
+    except Exception:
+        # Если Figma недоступна или токен невалидный, используем дефолтные токены
         tokens = _default_tokens()
 
     # 2. Парсим Markdown
     slides = parse_markdown(markdown)
 
     if not slides:
-        return HTMLResponse("Нет слайдов для генерации", status_code=400)
+        return PlainTextResponse("Нет слайдов для генерации", status_code=400)
 
     # 3. Генерируем PDF
-    pdf_bytes = generate_pdf(slides, tokens)
+    try:
+        pdf_bytes = generate_pdf(slides, tokens)
+    except Exception:
+        return PlainTextResponse("Ошибка генерации PDF", status_code=500)
+
+    if not pdf_bytes or not pdf_bytes.startswith(b"%PDF"):
+        return PlainTextResponse("Сгенерирован некорректный PDF", status_code=500)
 
     # 4. Отдаём файл
     return StreamingResponse(
