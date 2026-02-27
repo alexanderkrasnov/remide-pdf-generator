@@ -5,6 +5,7 @@ RemiDe PDF Generator — веб-приложение.
 
 import os
 from io import BytesIO
+from pathlib import Path
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
@@ -20,7 +21,10 @@ FIGMA_TOKEN = os.getenv("FIGMA_TOKEN", "")
 FIGMA_FILE_KEY = os.getenv("FIGMA_FILE_KEY", "evlu7PLuBtbw5unD8NmU9d")
 
 # Статические файлы
-app.mount("/static", StaticFiles(directory="static"), name="static")
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 FRONTEND_HTML = """<!DOCTYPE html>
