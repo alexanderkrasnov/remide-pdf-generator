@@ -4,6 +4,7 @@ RemiDe PDF Generator — веб-приложение.
 """
 
 import os
+import traceback
 from io import BytesIO
 from pathlib import Path
 from fastapi import FastAPI, Form, Request
@@ -265,8 +266,12 @@ async def generate(markdown: str = Form(...)):
     # 3. Генерируем PDF
     try:
         pdf_bytes = generate_pdf(slides, tokens)
-    except Exception:
-        return PlainTextResponse("Ошибка генерации PDF", status_code=500)
+    except Exception as exc:
+        traceback.print_exc()
+        return PlainTextResponse(
+            f"Ошибка генерации PDF: {type(exc).__name__}: {exc}",
+            status_code=500,
+        )
 
     if not pdf_bytes or not pdf_bytes.startswith(b"%PDF"):
         return PlainTextResponse("Сгенерирован некорректный PDF", status_code=500)
